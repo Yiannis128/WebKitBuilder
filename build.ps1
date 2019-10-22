@@ -67,7 +67,7 @@ function parseFile
 
       $fullPath = New-Object -TypeName "System.IO.FileInfo" (getBuildPathFromAbsolutePath $fileName (getDirStepChar));
       
-      createEmptyAtBuildDir $fullPath;
+      createEmptyDirAtBuildDir $fullPath;
 
       Copy-Item -Path $fileName.FullName -Destination $fullPath.FullName;
 
@@ -108,6 +108,7 @@ function parseFile
   }
 }
 
+#Saves the $oldFileInfo file, into the Build directory with the new file content.
 function saveFile 
 {
   param ([System.IO.FileInfo]$oldFileInfo, [string]$fileContent)
@@ -118,14 +119,15 @@ function saveFile
 
     $fullPath = New-Object -TypeName "System.IO.FileInfo" (getBuildPathFromAbsolutePath $oldFileInfo $dirSep);
     
-    createEmptyAtBuildDir $fullPath;
+    createEmptyDirAtBuildDir $fullPath;
 
     #Set the content of the file.
     Set-Content -Path $fullPath.FullName $fileContent
   }
 }
 
-function createEmptyAtBuildDir
+#Creates the relative Build directory path of the specified $file.
+function createEmptyDirAtBuildDir
 {
   param([System.IO.FileInfo] $file)
   process
@@ -145,6 +147,8 @@ function createEmptyAtBuildDir
   }
 }
 
+#This function gets the full path to the Build location that a source
+#file will be placed in.
 function getBuildPathFromAbsolutePath
 {
   param([string] $path, [string] $dirSep)
@@ -161,6 +165,7 @@ function getBuildPathFromAbsolutePath
   }
 }
 
+#Returns the character of the directory separator for the current OS.
 function getDirStepChar
 {
   param()
