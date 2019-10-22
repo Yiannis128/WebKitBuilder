@@ -11,6 +11,8 @@ $IGNORE_ITEMS = "Imports", "Build", ".vscode", "build", "clean";
 #The allowed extentions that will be parsed for the symbol replacement.
 $ALLOWED_EXT = ".html", ".css";
 
+$VersionNumber = "0.1";
+
 #This function scans for folders and recurses into them. If an item is found, then the scanFile method is
 #called on it.
 function scanDirectory 
@@ -175,6 +177,6 @@ function getDirStepChar
   }
 }
 
-Write-Output("`nStarting Web Compiler V0.1 - Yiannis Charalambous `n");
+Write-Output("`nStarting Web Compiler V$VersionNumber - Yiannis Charalambous `n");
 $currentDir = New-Object -TypeName System.IO.DirectoryInfo -ArgumentList "$PSScriptRoot";
 scanDirectory([System.IO.DirectoryInfo]$currentDir.FullName);
