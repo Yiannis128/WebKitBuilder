@@ -39,7 +39,7 @@ function BuildDirectoryRecursive
   param ([System.IO.DirectoryInfo] $directoryInfo)
   process
   {
-
+    #TODO: Stub
   }
 }
 
@@ -51,7 +51,7 @@ function GetTransformedRelativeDirectoryInBuildFolder
   param ([System.IO.SystemInfo] $itemPath)
   process
   {
-
+    #TODO: Stub
   }
 }
 
@@ -64,7 +64,7 @@ function ParseFile
   param ([string] $fileContent)
   process
   {
-
+    #TODO: Stub
   }
 }
 
@@ -75,7 +75,7 @@ function SaveFile
   param ([System.IO.FileInfo] $fileInfo, [string] $content)
   process
   {
-
+    #TODO: Stub
   }
 }
 
