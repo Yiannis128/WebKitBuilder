@@ -174,5 +174,4 @@ Write-Output "`n$PROGRAM_NAME V$Version - $AUTHOR`n";
 
 $startingDirectory = New-Object -TypeName "System.IO.DirectoryInfo" $PSScriptRoot;
 
-Write-Output $f;
 BuildDirectoryRecursive $startingDirectory;
