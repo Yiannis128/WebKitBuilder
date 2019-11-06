@@ -47,7 +47,7 @@ function BuildDirectoryRecursive
         #Check if this is an allowed file. If not then it will not be copied.
         if(!([string[]]$IGNORE_FILES).Contains($fileInfo.Name))
         {
-          $fileContent = Get-Item -Path $fileInfo.FullName;
+          $fileContent = Get-Content -Path $fileInfo.FullName;
 
           #Check if this file is parsable.
           if(([string[]]$PARSED_EXTENTIONS).Contains($fileInfo.Extension))
@@ -82,7 +82,7 @@ function GetTransformedRelativeDirectoryInBuildFolder
     
     $dirSep = GetDirSeparator;
 
-    return "$($PSScriptRoot)$($dirSep)$($relativePath)";
+    return "$($PSScriptRoot)$($dirSep)$($BuildLocation)$($dirSep)$($relativePath)";
   }
 }
 
@@ -92,10 +92,29 @@ function GetTransformedRelativeDirectoryInBuildFolder
 #of that file and then returns the file content. 
 function ParseFile
 {
-  param ([string] $fileContent)
+  param ([string[]] $fileContent)
   process
   {
-    #TODO: Stub
+    #Parse file line by line.
+    for($index = 0; $index -lt $fileContent.Length; $index++)
+    {
+      $line = $fileContent[$index];
+
+      if($line -match $REPLACE_TAG)
+      {
+        #Get the file name using the text inside the tag.
+        #First remove every character before the start of the tag.
+        $fileName = $line -replace $REPLACE_TAG_START, "";
+        #Then remove every character after the tag.
+        $fileName = $fileName -replace $REPLACE_TAG_END, "";
+        
+        $dirSep = GetDirSeparator;
+
+        $replaceContent = Get-Content -Path "$($ReplaceResourcesPath)$($dirSep)$($fileName)";
+
+        #TODO Replace content in array.
+      } 
+    }
   }
 }
 
@@ -136,16 +155,18 @@ $AUTHOR = "Yiannis";
 
 $Version = "0.1";
 
-$TAG_START = ".*@(";
-$TAG_END = ".*)@.*";
+$REPLACE_TAG_START = ".*@(";
+$REPLACE_TAG_END = ")@.*";
+$REPLACE_TAG = "$($REPLACE_TAG_START).*$($REPLACE_TAG_END)";
 
-$IGNORE_DIRECTORIES = "Build", "Import", ".git";
+$ReplaceResourcesPath = "Imports";
+
+$IGNORE_DIRECTORIES = "Build", $ReplaceResourcesPath, ".git";
 $IGNORE_FILES = "README.md", "build.ps1", "clean.ps1";
-$IGNORE_ITEMS = $IGNORE_DIRECTORIES + $IGNORE_FILES; #Powershell allows list appending.
 
 $PARSED_EXTENTIONS = ".html", ".css";
 
-$BuildLocation = "Build" + [string](GetDirSeparator);
+$BuildLocation = "Build"
 
 #Program
 
