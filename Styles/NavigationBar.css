@@ -1,0 +1,73 @@
+:root
+{
+    --HeaderColor: rgb(50, 50, 50);
+    --TextColor: rgb(190, 190, 190);
+    --TextColorHover: #ffffff;
+    --BorderRadius: 10px;
+    --NavListSeparation: 40px;
+    --ButtonColor: rgb(30, 30, 30);
+}
+
+header
+{
+    background-color: var(--HeaderColor);
+    border-radius: var(--BorderRadius);
+
+    position: fixed;
+
+    min-width: 850px;
+    width: 50%;
+    height: 60px;
+    right: 0;
+    left: 0;
+
+    margin: 10px auto;
+    padding: 0 5%;
+
+    filter: drop-shadow(0 15px 20px #000000);
+}
+
+nav
+{
+    float: right;
+}
+
+a
+{
+    text-decoration: none;
+}
+
+button
+{
+    border: transparent;
+    outline: 0;
+}
+
+.Logo
+{
+    float: left;
+    width: 50px;
+    image-rendering: pixelated;
+
+    margin: 5px 0;
+}
+
+.NavigationButton
+{
+    min-width: 100px;
+    height: 60px;
+    margin-left: 50px;
+
+    background: linear-gradient(180deg, transparent 50%, var(--ButtonColor) 50%);
+    background-size: 100% 200%;
+
+    color: var(--TextColor);
+
+    transition: 200ms ease-in-out;
+}
+
+.NavigationButton:hover
+{
+    background-position-y: 60px;
+    color: var(--TextColorHover);
+}

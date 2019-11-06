@@ -10,24 +10,6 @@
 
 #Author: Yiannis Charalambous
 
-#Global Variables
-
-$PROGRAM_NAME = "Web Builder";
-$AUTHOR = "Yiannis";
-
-$Version = "0.1";
-
-$TAG_START = ".*@(";
-$TAG_END = ".*)@.*";
-
-$IGNORE_DIRECTORIES = "Build", "Import", ".git";
-$IGNORE_FILES = "README.md", "build.ps1";
-$IGNORE_ITEMS = $IGNORE_DIRECTORIES + $IGNORE_FILES; #Powershell allows list appending.
-
-$PARSED_EXTENTIONS = ".html", ".css";
-
-$BuildLocation = "Build" + (GetDirSeparator);
-
 #This method scans through the directory pointed to by $directoryInfo.
 #The method then gets all the files and checks their extention.
 #If they have an extention of $PARSED_EXTENTIONS then they
@@ -39,7 +21,52 @@ function BuildDirectoryRecursive
   param ([System.IO.DirectoryInfo] $directoryInfo)
   process
   {
-    #TODO: Stub
+    Write-Output "Scanning Directory: $($directoryInfo.FullName)`n";
+
+    #Get all sub directories.
+    $children = Get-ChildItem -Path $directoryInfo.FullName;
+
+    foreach($childItem in $children)
+    {
+      #Determine if the child item is a directory or a file.
+      if($childItem -is [System.IO.DirectoryInfo])
+      {
+        $dirInfo = [System.IO.DirectoryInfo]$childItem;
+
+        #Check if this is an allowed directory.
+        if(!([string[]]$IGNORE_DIRECTORIES).Contains($dirInfo.Name))
+        {
+          #Scan this directory too.
+          BuildDirectoryRecursive $dirInfo;
+        }
+      }
+      elseif($childItem -is [System.IO.FileInfo]) #The childItem is a file.
+      {
+        $fileInfo = [System.IO.FileInfo]$childItem;
+
+        #Check if this is an allowed file. If not then it will not be copied.
+        if(!([string[]]$IGNORE_FILES).Contains($fileInfo.Name))
+        {
+          $fileContent = Get-Item -Path $fileInfo.FullName;
+
+          #Check if this file is parsable.
+          if(([string[]]$PARSED_EXTENTIONS).Contains($fileInfo.Extension))
+          {
+            Write-Output "Parsing file: $($fileInfo.FullName)";
+
+            $parsedFileContent = ParseFile $fileContent;
+
+            $buildFileInfo = GetTransformedRelativeDirectoryInBuildFolder $fileInfo;
+
+            SaveFile $buildFileInfo $parsedFileContent;
+          }
+          else #File will just be copied, not parsed.
+          {
+            SaveFile $fileInfo $fileContent;
+          }
+        }
+      }
+    }
   }
 }
 
@@ -48,10 +75,14 @@ function BuildDirectoryRecursive
 #IE: ./Resources/cat.png --> ./Build/Resources/cat.png
 function GetTransformedRelativeDirectoryInBuildFolder
 {
-  param ([System.IO.SystemInfo] $itemPath)
+  param ([System.IO.FileInfo] $itemPath)
   process
   {
-    #TODO: Stub
+    $relativePath = Resolve-Path -Relative;
+    
+    $dirSep = GetDirSeparator;
+
+    return "$($PSScriptRoot)$($dirSep)$($relativePath)";
   }
 }
 
@@ -75,7 +106,9 @@ function SaveFile
   param ([System.IO.FileInfo] $fileInfo, [string] $content)
   process
   {
-    #TODO: Stub
+    Write-Output "Saving file: $($fileInfo.FullName)";
+
+    Set-Item -Path $fileInfo.FullName -Value $content;
   }
 }
 
@@ -96,8 +129,29 @@ function GetDirSeparator
   }
 }
 
-Write-Output "$PROGRAM_NAME V$Version - $AUTHOR";
+#Global Variables
+
+$PROGRAM_NAME = "Web Builder";
+$AUTHOR = "Yiannis";
+
+$Version = "0.1";
+
+$TAG_START = ".*@(";
+$TAG_END = ".*)@.*";
+
+$IGNORE_DIRECTORIES = "Build", "Import", ".git";
+$IGNORE_FILES = "README.md", "build.ps1", "clean.ps1";
+$IGNORE_ITEMS = $IGNORE_DIRECTORIES + $IGNORE_FILES; #Powershell allows list appending.
+
+$PARSED_EXTENTIONS = ".html", ".css";
+
+$BuildLocation = "Build" + [string](GetDirSeparator);
+
+#Program
+
+Write-Output "`n$PROGRAM_NAME V$Version - $AUTHOR`n";
 
 $startingDirectory = New-Object -TypeName "System.IO.DirectoryInfo" $PSScriptRoot;
 
-BuildDirectoryRecursive [System.IO.DirectoryInfo]$startingDirectory;
+Write-Output $f;
+BuildDirectoryRecursive $startingDirectory;
