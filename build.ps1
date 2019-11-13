@@ -78,7 +78,7 @@ function GetTransformedRelativeDirectoryInBuildFolder
   param ([System.IO.FileInfo] $itemPath)
   process
   {
-    $relativePath = Resolve-Path -Relative;
+    $relativePath = Resolve-Path -Relative -Path $itemPath;
     
     $dirSep = GetDirSeparator;
 
@@ -104,8 +104,10 @@ function ParseFile
       {
         #Get the file name using the text inside the tag.
         #First remove every character before the start of the tag.
+        #TODO Fix bugs that produces error: The regular expression pattern .*@( is not valid.
         $fileName = $line -replace $REPLACE_TAG_START, "";
         #Then remove every character after the tag.
+        #TODO The regular expression pattern )@.* is not valid.
         $fileName = $fileName -replace $REPLACE_TAG_END, "";
         
         $dirSep = GetDirSeparator;
@@ -127,7 +129,20 @@ function SaveFile
   {
     Write-Output "Saving file: $($fileInfo.FullName)";
 
-    Set-Item -Path $fileInfo.FullName -Value $content;
+    if(!(Test-Path -Path $fileInfo.Directory)) #See if the directory of the file exists.
+    {
+      #If it does not exist then powershell creates it recursivly.
+      New-Item -Path $fileInfo.Directory -ItemType "Directory";
+    }
+
+    #Check if the file exists already, if it does not then create it.
+    if(!(Test-Path -Path $fileInfo.FullName))
+    {
+      New-Item -ItemType "File" -Path $fileInfo.FullName;
+    }
+
+    #Write the content to the file.
+    Set-Content -Path $fileInfo.FullName -Value $content;
   }
 }
 
