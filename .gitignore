@@ -1,1 +1,14 @@
 * !build.ps1 !clean.ps1 !.gitignore !README.md
+Home.html
+News.html
+PixelEngine.html
+Imports/Footer.html
+Imports/Header.html
+Imports/Home.html
+Resources/Images/Logo.PNG
+Resources/Images/Home/Creation.jpg
+Styles/Footer.css
+Styles/Main.css
+Styles/NavigationBar.css
+Styles/NavigationBarBeta.css
+Styles/News.css

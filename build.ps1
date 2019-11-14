@@ -62,7 +62,8 @@ function BuildDirectoryRecursive
           }
           else #File will just be copied, not parsed.
           {
-            SaveFile $fileInfo $fileContent;
+            $buildFileInfo = GetTransformedRelativeDirectoryInBuildFolder $fileInfo;
+            SaveFile $buildFileInfo $fileContent;
           }
         }
       }
@@ -78,7 +79,7 @@ function GetTransformedRelativeDirectoryInBuildFolder
   param ([System.IO.FileInfo] $itemPath)
   process
   {
-    $relativePath = Resolve-Path -Relative -Path $itemPath;
+    $relativePath = Resolve-Path -Relative -Path $itemPath.FullName;
     
     $dirSep = GetDirSeparator;
 
@@ -132,19 +133,19 @@ function SaveFile
     if(!(Test-Path -Path $fileInfo.Directory)) #See if the directory of the file exists.
     {
       #If it does not exist then powershell creates it recursivly.
-      New-Item -Path $fileInfo.Directory -ItemType "Directory";
+      New-Item -Path $fileInfo.Directory -ItemType "Directory" | Out-Null;
     }
 
     #Check if the file exists already, if it does not then create it.
     if(!(Test-Path -Path $fileInfo.FullName))
     {
-      New-Item -ItemType "File" -Path $fileInfo.FullName;
+      New-Item -ItemType "File" -Path $fileInfo.FullName | Out-Null;
     }
 
-    Write-Output "To: $($fileInfo.FullName)";
+    Write-Output "To: $($fileInfo.FullName)`n";
 
     #Write the content to the file.
-    Set-Content -Path $fileInfo.FullName -Value $content;
+    Set-Content -Path $fileInfo.FullName -Value $content | Out-Null;
   }
 }
 
