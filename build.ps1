@@ -111,10 +111,10 @@ function ParseFile
         $fileName = $fileName -replace $REPLACE_TAG_END, "";
         
         $dirSep = GetDirSeparator;
-
+        
         $replaceContent = Get-Content -Path "$($ReplaceResourcesPath)$($dirSep)$($fileName)";
 
-        #TODO Replace content in array.
+        $fileContent[$index] = $replaceContent;
       } 
     }
   }
@@ -140,6 +140,8 @@ function SaveFile
     {
       New-Item -ItemType "File" -Path $fileInfo.FullName;
     }
+
+    Write-Output "To: $($fileInfo.FullName)";
 
     #Write the content to the file.
     Set-Content -Path $fileInfo.FullName -Value $content;
@@ -170,8 +172,8 @@ $AUTHOR = "Yiannis";
 
 $Version = "0.1";
 
-$REPLACE_TAG_START = ".*@(";
-$REPLACE_TAG_END = ")@.*";
+$REPLACE_TAG_START = "[.*]@(";
+$REPLACE_TAG_END = ")@[.*]";
 $REPLACE_TAG = "$($REPLACE_TAG_START).*$($REPLACE_TAG_END)";
 
 $ReplaceResourcesPath = "Imports";
