@@ -68,7 +68,7 @@ function BuildDirectoryRecursive
 
             Write-Output "Saving file: $($fileInfo.FullName)";
 
-            SaveFile $buildFileInfo $fileContent;
+            Copy-Item -Path $fileInfo -Destination $buildFileInfo;
           }
         }
       }
@@ -139,6 +139,8 @@ function ParseFile
         $fileContentList.InsertRange($index, $replaceContent);
       } 
     }
+
+    return $fileContentList.ToArray();
   }
 }
 
