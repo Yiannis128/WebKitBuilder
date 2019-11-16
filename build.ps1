@@ -58,11 +58,16 @@ function BuildDirectoryRecursive
 
             $buildFileInfo = GetTransformedRelativeDirectoryInBuildFolder $fileInfo;
 
+            Write-Output "Saving file: $($fileInfo.FullName)";
+
             SaveFile $buildFileInfo $parsedFileContent;
           }
           else #File will just be copied, not parsed.
           {
             $buildFileInfo = GetTransformedRelativeDirectoryInBuildFolder $fileInfo;
+
+            Write-Output "Saving file: $($fileInfo.FullName)";
+
             SaveFile $buildFileInfo $fileContent;
           }
         }
@@ -87,6 +92,21 @@ function GetTransformedRelativeDirectoryInBuildFolder
   }
 }
 
+function ParseTag
+{
+  param([string] $tag)
+  process
+  {
+    $parsedResult = [regex]::match($tag , $REPLACE_TAG).Groups[1].Value;
+
+    #The $parsedResult currently is surrounded by brackets that need removal.
+    $parsedResult = $parsedResult.Remove(0,1);
+    $parsedResult = $parsedResult.Remove($parsedResult.Length - 1, 1);
+
+    return $parsedResult;
+  }
+}
+
 #Scans through the file line by line. Tries to find a tag which is described by $TAG_START
 #and ends with $TAG_END. In between there exists a file name that describes a file that
 #should reside inside the ./Imports folder, the method then replaces the tag with the content
@@ -96,26 +116,27 @@ function ParseFile
   param ([string[]] $fileContent)
   process
   {
+    $fileContentList = New-Object -TypeName "System.Collections.ArrayList";
+    $fileContentList.InsertRange(0, $fileContent);
+
     #Parse file line by line.
-    for($index = 0; $index -lt $fileContent.Length; $index++)
+    for($index = 0; $index -lt $fileContentList.Count; $index++)
     {
-      $line = $fileContent[$index];
+      $line = $fileContentList[$index];
 
       if($line -match $REPLACE_TAG)
       {
         #Get the file name using the text inside the tag.
-        #First remove every character before the start of the tag.
-        #TODO Fix bugs that produces error: The regular expression pattern .*@( is not valid.
-        $fileName = $line -replace $REPLACE_TAG_START, "";
-        #Then remove every character after the tag.
-        #TODO The regular expression pattern )@.* is not valid.
-        $fileName = $fileName -replace $REPLACE_TAG_END, "";
+        $fileName = ParseTag $line;
+
+        #Remove this line from the content of the file.
+        $fileContentList.Remove($line);
         
         $dirSep = GetDirSeparator;
         
-        $replaceContent = Get-Content -Path "$($ReplaceResourcesPath)$($dirSep)$($fileName)";
+        $replaceContent = [string[]](Get-Content -Path "$($ReplaceResourcesPath)$($dirSep)$($fileName)");
 
-        $fileContent[$index] = $replaceContent;
+        $fileContentList.InsertRange($index, $replaceContent);
       } 
     }
   }
@@ -128,8 +149,6 @@ function SaveFile
   param ([System.IO.FileInfo] $fileInfo, [string] $content)
   process
   {
-    Write-Output "Saving file: $($fileInfo.FullName)";
-
     if(!(Test-Path -Path $fileInfo.Directory)) #See if the directory of the file exists.
     {
       #If it does not exist then powershell creates it recursivly.
@@ -173,14 +192,12 @@ $AUTHOR = "Yiannis";
 
 $Version = "0.1";
 
-$REPLACE_TAG_START = "[.*]@(";
-$REPLACE_TAG_END = ")@[.*]";
-$REPLACE_TAG = "$($REPLACE_TAG_START).*$($REPLACE_TAG_END)";
+$REPLACE_TAG = "@(.*)@";
 
 $ReplaceResourcesPath = "Imports";
 
-$IGNORE_DIRECTORIES = "Build", $ReplaceResourcesPath, ".git";
-$IGNORE_FILES = "README.md", "build.ps1", "clean.ps1";
+$IGNORE_DIRECTORIES = "Build", $ReplaceResourcesPath, ".git", ".vscode";
+$IGNORE_FILES = "README.md", "build.ps1", "clean.ps1", ".gitignore";
 
 $PARSED_EXTENTIONS = ".html", ".css";
 
@@ -193,3 +210,5 @@ Write-Output "`n$PROGRAM_NAME V$Version - $AUTHOR`n";
 $startingDirectory = New-Object -TypeName "System.IO.DirectoryInfo" $PSScriptRoot;
 
 BuildDirectoryRecursive $startingDirectory;
+
+Write-Output "Build Finished.";
