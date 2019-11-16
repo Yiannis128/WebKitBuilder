@@ -190,7 +190,7 @@ function GetDirSeparator
 $PROGRAM_NAME = "Web Builder";
 $AUTHOR = "Yiannis";
 
-$Version = "0.1";
+$Version = "1.0";
 
 $REPLACE_TAG = "@(.*)@";
 
